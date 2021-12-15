@@ -1,6 +1,6 @@
 from __future__ import print_function, division
 
-import os
+import os, cv2
 import torch
 import pandas as pd
 from skimage import io, transform
@@ -20,8 +20,8 @@ def make_dataset(root, mode):
     assert mode in ['train', 'val', 'test']
     items = []
     if mode == 'train':
-        train_img_path = os.path.join(root, 'train', 'Img')
-        train_mask_path = os.path.join(root, 'train', 'GT')
+        train_img_path = os.path.join(root, 'train folder', 'img')
+        train_mask_path = os.path.join(root, 'train folder', 'labelcol')
 
         images = os.listdir(train_img_path)
         labels = os.listdir(train_mask_path)
@@ -33,8 +33,8 @@ def make_dataset(root, mode):
             item = (os.path.join(train_img_path, it_im), os.path.join(train_mask_path, it_gt))
             items.append(item)
     elif mode == 'val':
-        train_img_path = os.path.join(root, 'val', 'Img')
-        train_mask_path = os.path.join(root, 'val', 'GT')
+        train_img_path = os.path.join(root, 'validation folder', 'img')
+        train_mask_path = os.path.join(root, 'validation folder', 'labelcol')
 
         images = os.listdir(train_img_path)
         labels = os.listdir(train_mask_path)
@@ -46,8 +46,8 @@ def make_dataset(root, mode):
             item = (os.path.join(train_img_path, it_im), os.path.join(train_mask_path, it_gt))
             items.append(item)
     else:
-        train_img_path = os.path.join(root, 'test', 'Img')
-        train_mask_path = os.path.join(root, 'test', 'GT')
+        train_img_path = os.path.join(root, 'test folder', 'img')
+        train_mask_path = os.path.join(root, 'test folder', 'labelcol')
 
         images = os.listdir(train_img_path)
         labels = os.listdir(train_mask_path)
@@ -110,6 +110,9 @@ class MedicalImageDataset(Dataset):
 
         if self.augmentation:
             img, mask = self.augment(img, mask)
+            
+        img = cv2.resize(img, (256, 256))
+        mask = cv2.resize(mask, (256, 256))
 
         if self.transform:
             img = self.transform(img)
