@@ -99,9 +99,9 @@ class MedicalImageDataset(Dataset):
     def __getitem__(self, index):
         img_path, mask_path = self.imgs[index]
         # print("{} and {}".format(img_path,mask_path))
-        #img = Image.open(img_path)  # .convert('RGB')
+        img = Image.open(img_path).convert('RGB')
         #mask = Image.open(mask_path)  # .convert('RGB')
-        img = Image.open(img_path).convert('L')
+#         img = Image.open(img_path).convert('L')
         mask = Image.open(mask_path).convert('L')
         
         #print('{} and {}'.format(img_path,mask_path))
@@ -111,8 +111,10 @@ class MedicalImageDataset(Dataset):
         if self.augmentation:
             img, mask = self.augment(img, mask)
             
-        img = cv2.resize(img, (256, 256))
-        mask = cv2.resize(mask, (256, 256))
+#         img = cv2.resize(img, (256, 256))
+#         mask = cv2.resize(mask, (256, 256))
+        img = img.resize((256, 256))
+        mask = mask.resize((256, 256))
 
         if self.transform:
             img = self.transform(img)
