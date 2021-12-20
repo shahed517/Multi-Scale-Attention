@@ -29,7 +29,7 @@ class LambdaReduce(LambdaBase):
 
 def resnext50():
     model  = resnext50_32x4d()
-    model.conv1 = nn.Conv2d(1, 64, (7, 7), (2, 2), (3, 3), 1, 1, bias = False)
+    model.conv1 = nn.Conv2d(3, 64, (7, 7), (2, 2), (3, 3), 1, 1, bias = False)
     model.avgpool = nn.AvgPool2d((7,7), (1, 1))
     model.fc = nn.Sequential(
         Lambda(lambda  x: x.view(x.size(0), -1)),
@@ -40,7 +40,7 @@ def resnext50():
 
 def resnext101():
     model  = resnext101_32x8d()
-    model.conv1 = nn.Conv2d(1, 64, (7, 7), (2, 2), (3, 3), 1, 1, bias = False)
+    model.conv1 = nn.Conv2d(3, 64, (7, 7), (2, 2), (3, 3), 1, 1, bias = False)
     model.avgpool = nn.AvgPool2d((7,7), (1, 1))
     model.fc = nn.Sequential(
         Lambda(lambda  x: x.view(x.size(0), -1)),
