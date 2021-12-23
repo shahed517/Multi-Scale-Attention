@@ -127,7 +127,7 @@ def runTraining(args):
 
     softMax = nn.Softmax()
 #     CE_loss = nn.CrossEntropyLoss()
-    CE_loss = nn.BCELoss()
+    CE_loss = nn.BCEWithLogitsLoss()
     Dice_loss = computeDiceOneHot()
     mseLoss = nn.MSELoss()
 
@@ -219,7 +219,7 @@ def runTraining(args):
                 outputs0_2 + outputs1_2 + outputs2_2 + outputs3_2
                 ) / 8
             ###
-            segmentation_prediction = torch.sigmoid(segmentation_prediction)
+#             segmentation_prediction = torch.sigmoid(segmentation_prediction)
 #             predClass_y = softMax(segmentation_prediction)
 
 #             Segmentation_planes = getOneHotSegmentation(Segmentation)
