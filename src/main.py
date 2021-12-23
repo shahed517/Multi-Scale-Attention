@@ -38,47 +38,17 @@ def check_accuracy(loader, model, device="cuda"):
             x = image.to(device)
             y = labels.to(device).unsqueeze(1)
             # Network outputs
-            semVector_1_1, semVector_2_1, \
-            semVector_1_2, \
-            semVector_2_2, \
-            semVector_1_3, \
-            semVector_2_3, \
-            semVector_1_4, \
-            semVector_2_4, \
-            inp_enc0, \
-            inp_enc1, \
-            inp_enc2, \
-            inp_enc3, \
-            inp_enc4, \
-            inp_enc5, \
-            inp_enc6, \
-            inp_enc7, \
-            out_enc0, \
-            out_enc1, \
-            out_enc2, \
-            out_enc3, \
-            out_enc4, \
-            out_enc5, \
-            out_enc6, \
-            out_enc7, \
-            outputs0, \
-            outputs1, \
-            outputs2, \
-            outputs3, \
-            outputs0_2, \
-            outputs1_2, \
-            outputs2_2, \
-            outputs3_2 = model(x)
+            output = torch.sigmoid(model(x))
             
-            outputs0_2, outputs1_2, outputs2_2, outputs3_2 = torch.sigmoid(outputs0_2), torch.sigmoid(outputs1_2), \
-                                                             torch.sigmoid(outputs2_2), torch.sigmoid(outputs3_2)
+#             outputs0_2, outputs1_2, outputs2_2, outputs3_2 = torch.sigmoid(outputs0_2), torch.sigmoid(outputs1_2), \
+#                                                              torch.sigmoid(outputs2_2), torch.sigmoid(outputs3_2)
             
-            outputs0_2 = (outputs0_2>0.5).float()
-            outputs1_2 = (outputs1_2>0.5).float()
-            outputs2_2 = (outputs2_2>0.5).float()
-            outputs3_2 = (outputs3_2>0.5).float()
+#             outputs0_2 = (outputs0_2>0.5).float()
+#             outputs1_2 = (outputs1_2>0.5).float()
+#             outputs2_2 = (outputs2_2>0.5).float()
+#             outputs3_2 = (outputs3_2>0.5).float()
             
-            preds = (outputs0_2 + outputs1_2 + outputs3_2 + outputs4_2)/4
+            preds = (output>0.5).float()
 
             tp = (y * preds).sum().to(torch.float32)
             tn = ((1 - y) * (1 - preds)).sum().to(torch.float32)
