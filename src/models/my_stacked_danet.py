@@ -103,15 +103,25 @@ class DAF_stack(nn.Module):
         self.refine2 = MultiConv(128, 64, False)
         self.refine1 = MultiConv(128, 64, False)
 
-        self.predict4 = nn.Conv2d(64, 5, kernel_size=1)
-        self.predict3 = nn.Conv2d(64, 5, kernel_size=1)
-        self.predict2 = nn.Conv2d(64, 5, kernel_size=1)
-        self.predict1 = nn.Conv2d(64, 5, kernel_size=1)
+#         self.predict4 = nn.Conv2d(64, 5, kernel_size=1)
+#         self.predict3 = nn.Conv2d(64, 5, kernel_size=1)
+#         self.predict2 = nn.Conv2d(64, 5, kernel_size=1)
+#         self.predict1 = nn.Conv2d(64, 5, kernel_size=1)
 
-        self.predict4_2 = nn.Conv2d(64, 5, kernel_size=1)
-        self.predict3_2 = nn.Conv2d(64, 5, kernel_size=1)
-        self.predict2_2 = nn.Conv2d(64, 5, kernel_size=1)
-        self.predict1_2 = nn.Conv2d(64, 5, kernel_size=1)
+#         self.predict4_2 = nn.Conv2d(64, 5, kernel_size=1)
+#         self.predict3_2 = nn.Conv2d(64, 5, kernel_size=1)
+#         self.predict2_2 = nn.Conv2d(64, 5, kernel_size=1)
+#         self.predict1_2 = nn.Conv2d(64, 5, kernel_size=1)
+
+        self.predict4 = nn.Conv2d(64, 1, kernel_size=1)
+        self.predict3 = nn.Conv2d(64, 1, kernel_size=1)
+        self.predict2 = nn.Conv2d(64, 1, kernel_size=1)
+        self.predict1 = nn.Conv2d(64, 1, kernel_size=1)
+
+        self.predict4_2 = nn.Conv2d(64, 1, kernel_size=1)
+        self.predict3_2 = nn.Conv2d(64, 1, kernel_size=1)
+        self.predict2_2 = nn.Conv2d(64, 1, kernel_size=1)
+        self.predict1_2 = nn.Conv2d(64, 1, kernel_size=1)
 
     def forward(self, x):
         layer0 = self.resnext.layer0(x)
