@@ -32,9 +32,11 @@ def check_accuracy(loader, model, device="cuda"):
     model.eval()
     epsilon = 1e-7
     with torch.no_grad():
-        for idx, (x, y) in enumerate(loader):
-            x = x.to(device)
-            y = y.to(device).unsqueeze(1)
+#         for idx, (x, y) in enumerate(loader):
+        for j, data in enumerate(train_loader):
+            image, labels, img_names = data
+            x = image.to(device)
+            y = labels.to(device).unsqueeze(1)
             output = torch.sigmoid(model(x))
             
             output = (output>0.5).float()
