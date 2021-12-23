@@ -364,7 +364,7 @@ def runTraining(args):
 
             BestEpoch = i
             
-            if currentDice > 0.40:
+            if currentDice > 0.20:
 
 #                 if np.mean(mean_DSC3D)>np.mean(BestDice3D):
 #                     BestDice3D = mean_DSC3D
@@ -374,7 +374,8 @@ def runTraining(args):
 #                 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Saving best model..... ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 #                 if not os.path.exists(model_dir):
 #                     os.makedirs(model_dir)
-                torch.save(net.state_dict(), os.path.join(model_dir, "Best_" + modelName + ".pth"),pickle_module=dill)
+#                 torch.save(net.state_dict(), os.path.join(model_dir, "Best_" + modelName + ".pth"),pickle_module=dill)
+                torch.save(net.state_dict(), './Weightfile/best_model.pth', pickle_module = dill)
                 
 #                 reconstruct3D(modelName, 1000, isBest=True)
        
