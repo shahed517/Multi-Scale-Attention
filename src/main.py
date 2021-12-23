@@ -24,6 +24,39 @@ from common.utils import (evaluate3D,
                           to_var
                           )
     
+def check_accuracy(loader, model, device="cuda"):
+    num_correct = 0
+    num_pixels = 0
+    dice_score = 0
+    iou = 0; f1 = 0; PRECISION = 0; RECALL = 0; accuracy = 0; dice_score = 0
+    model.eval()
+    epsilon = 1e-7
+    with torch.no_grad():
+        for idx, (x, y) in enumerate(loader):
+            x = x.to(device)
+            y = y.to(device).unsqueeze(1)
+            preds = torch.sigmoid(model(x))
+            preds = (preds>0.5).float()
+
+            tp = (y * preds).sum().to(torch.float32)
+            tn = ((1 - y) * (1 - preds)).sum().to(torch.float32)
+            fp = ((1 - y) * preds).sum().to(torch.float32)
+            fn = (y * (1 - preds)).sum().to(torch.float32)
+            
+            precision = tp / (tp + fp + epsilon)
+            recall = tp / (tp + fn + epsilon)
+            PRECISION += precision
+            RECALL += recall
+            
+            f1 += 2* (precision*recall) / (precision + recall + epsilon)
+            accuracy += (tp + tn)/(tp + fp + tn + fn)
+
+            intersection = (preds*y).sum()
+            iou += (intersection/(epsilon + (preds + y).sum() - intersection)) # iou = (P int Q)/(P + Q - (P int Q))
+            dice_score += (2*(preds*y).sum()) / (epsilon + (preds + y).sum())           
+    model.train()
+    return iou/len(loader), f1/len(loader), PRECISION/len(loader), RECALL/len(loader), accuracy/len(loader), dice_score/len(loader)
+  
 def weights_init(m):
     if type(m) == nn.Conv2d or type(m) == nn.ConvTranspose2d:
         nn.init.xavier_normal(m.weight.data)
@@ -128,11 +161,11 @@ def runTraining(args):
 
     print("~~~~~~~~~~~ Starting the training ~~~~~~~~~~")
     for i in range(epoch):
-        net.train()
+#         net.train()
         lossVal = []
 
         totalImages = len(train_loader)
-       
+        net.train()
         for j, data in enumerate(train_loader):
             image, labels, img_names = data
 
@@ -261,8 +294,11 @@ def runTraining(args):
         
         Losses.append(np.mean(lossVal))
         
-        d1,d2,d3,d4 = inference(net, val_loader)
-        iou_score_val, f1_score_val, _, _, _, _ = check_accuracy(val_loader, model, device=DEVICE)
+#         d1,d2,d3,d4 = inference(net, val_loader)
+        iou_score_val, currentDice, _, _, _, _ = check_accuracy(val_loader, model, device=DEVICE)
+        print(f"Mean IoU score on validation set : {iou_score_val}")
+        print(f"Mean F1 score on validation set : {f1_score_val}")
+        
         
 #         d1Val.append(d1)
 #         d2Val.append(d2)
@@ -318,21 +354,23 @@ def runTraining(args):
             
             if currentDice > 0.40:
 
-                if np.mean(mean_DSC3D)>np.mean(BestDice3D):
-                    BestDice3D = mean_DSC3D
+#                 if np.mean(mean_DSC3D)>np.mean(BestDice3D):
+#                     BestDice3D = mean_DSC3D
 
-                print("###    In 3D -----> MEAN: {}, Dice(1): {:.4f} Dice(2): {:.4f} Dice(3): {:.4f} Dice(4): {:.4f}   ###".format(np.mean(mean_DSC3D),mean_DSC3D[0], mean_DSC3D[1], mean_DSC3D[2], mean_DSC3D[3]))
+#                 print("###    In 3D -----> MEAN: {}, Dice(1): {:.4f} Dice(2): {:.4f} Dice(3): {:.4f} Dice(4): {:.4f}   ###".format(np.mean(mean_DSC3D),mean_DSC3D[0], mean_DSC3D[1], mean_DSC3D[2], mean_DSC3D[3]))
 
-                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Saving best model..... ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                if not os.path.exists(model_dir):
-                    os.makedirs(model_dir)
+#                 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Saving best model..... ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+#                 if not os.path.exists(model_dir):
+#                     os.makedirs(model_dir)
                 torch.save(net.state_dict(), os.path.join(model_dir, "Best_" + modelName + ".pth"),pickle_module=dill)
-                reconstruct3D(modelName, 1000, isBest=True)
+                
+#                 reconstruct3D(modelName, 1000, isBest=True)
+       
 
-        print("###                                                       ###")
-        print("###    Best Dice: {:.4f} at epoch {} with Dice(1): {:.4f} Dice(2): {:.4f} Dice(3): {:.4f} Dice(4): {:.4f}   ###".format(BestDice, BestEpoch, d1,d2,d3,d4))
-        print("###    Best Dice in 3D: {:.4f} with Dice(1): {:.4f} Dice(2): {:.4f} Dice(3): {:.4f} Dice(4): {:.4f} ###".format(np.mean(BestDice3D),BestDice3D[0], BestDice3D[1], BestDice3D[2], BestDice3D[3] ))
-        print("###                                                       ###")
+#         print("###                                                       ###")
+#         print("###    Best Dice: {:.4f} at epoch {} with Dice(1): {:.4f} Dice(2): {:.4f} Dice(3): {:.4f} Dice(4): {:.4f}   ###".format(BestDice, BestEpoch, d1,d2,d3,d4))
+#         print("###    Best Dice in 3D: {:.4f} with Dice(1): {:.4f} Dice(2): {:.4f} Dice(3): {:.4f} Dice(4): {:.4f} ###".format(np.mean(BestDice3D),BestDice3D[0], BestDice3D[1], BestDice3D[2], BestDice3D[3] ))
+#         print("###                                                       ###")
 
         if i % (BestEpoch + 50) == 0:
             for param_group in optimizer.param_groups:
