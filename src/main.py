@@ -35,8 +35,12 @@ def check_accuracy(loader, model, device="cuda"):
         for idx, (x, y) in enumerate(loader):
             x = x.to(device)
             y = y.to(device).unsqueeze(1)
-            preds = torch.sigmoid(model(x))
-            preds = (preds>0.5).float()
+            output = torch.sigmoid(model(x))
+            
+            output = (output>0.5).float()
+            
+            output = output[-4:]
+            preds = (output[-1] + output[-2] + output[-3] + output[-4])/4
 
             tp = (y * preds).sum().to(torch.float32)
             tn = ((1 - y) * (1 - preds)).sum().to(torch.float32)
