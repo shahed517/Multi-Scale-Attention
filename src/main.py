@@ -33,7 +33,7 @@ def check_accuracy(loader, model, device="cuda"):
     epsilon = 1e-7
     with torch.no_grad():
 #         for idx, (x, y) in enumerate(loader):
-        for j, data in enumerate(train_loader):
+        for j, data in enumerate(loader):
             image, labels, img_names = data
             x = image.to(device)
             y = labels.to(device).unsqueeze(1)
