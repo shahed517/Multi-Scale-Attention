@@ -309,7 +309,7 @@ def runTraining(args):
 #         d1,d2,d3,d4 = inference(net, val_loader)
         iou_score_val, currentDice, _, _, _, _ = check_accuracy(val_loader, net, device="cuda")
         print(f"Mean IoU score on validation set : {iou_score_val}")
-        print(f"Mean F1 score on validation set : {f1_score_val}")
+        print(f"Mean F1 score on validation set : {currentDice}")
         
         
 #         d1Val.append(d1)
