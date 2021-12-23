@@ -93,7 +93,8 @@ def runTraining(args):
     net.apply(weights_init)
 
     softMax = nn.Softmax()
-    CE_loss = nn.CrossEntropyLoss()
+#     CE_loss = nn.CrossEntropyLoss()
+    CE_loss = nn.BCELoss()
     Dice_loss = computeDiceOneHot()
     mseLoss = nn.MSELoss()
 
@@ -184,14 +185,15 @@ def runTraining(args):
                 outputs0 + outputs1 + outputs2 + outputs3 +\
                 outputs0_2 + outputs1_2 + outputs2_2 + outputs3_2
                 ) / 8
-            predClass_y = softMax(segmentation_prediction)
+#             predClass_y = softMax(segmentation_prediction)
 
-            Segmentation_planes = getOneHotSegmentation(Segmentation)
+#             Segmentation_planes = getOneHotSegmentation(Segmentation)
 
-            segmentation_prediction_ones = predToSegmentation(predClass_y)
+#             segmentation_prediction_ones = predToSegmentation(predClass_y)
 
             # It needs the logits, not the softmax
-            Segmentation_class = getTargetSegmentation(Segmentation)
+#             Segmentation_class = getTargetSegmentation(Segmentation)
+            Segmentation_class = Segmentation
 
             # Cross-entropy loss
             loss0 = CE_loss(outputs0, Segmentation_class)
@@ -222,34 +224,35 @@ def runTraining(args):
                 + 0.1 * (lossRec0 + lossRec1 + lossRec2 + lossRec3 + lossRec4 + lossRec5 + lossRec6 + lossRec7)  # CE_lossG
 
             # Compute the DSC
-            DicesN, DicesB, DicesW, DicesT, DicesZ = Dice_loss(segmentation_prediction_ones, Segmentation_planes)
+#             DicesN, DicesB, DicesW, DicesT, DicesZ = Dice_loss(segmentation_prediction_ones, Segmentation_planes)
 
-            DiceB = DicesToDice(DicesB)
-            DiceW = DicesToDice(DicesW)
-            DiceT = DicesToDice(DicesT)
-            DiceZ = DicesToDice(DicesZ)
+#             DiceB = DicesToDice(DicesB)
+#             DiceW = DicesToDice(DicesW)
+#             DiceT = DicesToDice(DicesT)
+#             DiceZ = DicesToDice(DicesZ)
 
-            Dice_score = (DiceB + DiceW + DiceT+ DiceZ) / 4
+#             Dice_score = (DiceB + DiceW + DiceT+ DiceZ) / 4
 
             lossG.backward()
             optimizer.step()
             
             lossVal.append(lossG.cpu().data.numpy())
 
-            printProgressBar(j + 1, totalImages,
-                             prefix="[Training] Epoch: {} ".format(i),
-                             length=15,
-                             suffix=" Mean Dice: {:.4f}, Dice1: {:.4f} , Dice2: {:.4f}, , Dice3: {:.4f}, Dice4: {:.4f} ".format(
-                                 Dice_score.cpu().data.numpy(),
-                                 DiceB.data.cpu().data.numpy(),
-                                 DiceW.data.cpu().data.numpy(),
-                                 DiceT.data.cpu().data.numpy(),
-                                 DiceZ.data.cpu().data.numpy(),))
+#             printProgressBar(j + 1, totalImages,
+#                              prefix="[Training] Epoch: {} ".format(i),
+#                              length=15,
+#                              suffix=" Mean Dice: {:.4f}, Dice1: {:.4f} , Dice2: {:.4f}, , Dice3: {:.4f}, Dice4: {:.4f} ".format(
+#                                  Dice_score.cpu().data.numpy(),
+#                                  DiceB.data.cpu().data.numpy(),
+#                                  DiceW.data.cpu().data.numpy(),
+#                                  DiceT.data.cpu().data.numpy(),
+#                                  DiceZ.data.cpu().data.numpy(),))
 
       
         printProgressBar(totalImages, totalImages,
                              done="[Training] Epoch: {}, LossG: {:.4f}".format(i,np.mean(lossVal)))
        
+      
         # Save statistics
         modelName = args.modelName
         directory = args.save_dir + modelName
@@ -258,51 +261,51 @@ def runTraining(args):
         
         d1,d2,d3,d4 = inference(net, val_loader)
         
-        d1Val.append(d1)
-        d2Val.append(d2)
-        d3Val.append(d3)
-        d4Val.append(d4)
+#         d1Val.append(d1)
+#         d2Val.append(d2)
+#         d3Val.append(d3)
+#         d4Val.append(d4)
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+#         if not os.path.exists(directory):
+#             os.makedirs(directory)
 
-        np.save(os.path.join(directory, 'Losses.npy'), Losses)
-        np.save(os.path.join(directory, 'd1Val.npy'), d1Val)
-        np.save(os.path.join(directory, 'd2Val.npy'), d2Val)
-        np.save(os.path.join(directory, 'd3Val.npy'), d3Val)
+#         np.save(os.path.join(directory, 'Losses.npy'), Losses)
+#         np.save(os.path.join(directory, 'd1Val.npy'), d1Val)
+#         np.save(os.path.join(directory, 'd2Val.npy'), d2Val)
+#         np.save(os.path.join(directory, 'd3Val.npy'), d3Val)
 
-        currentDice = (d1+d2+d3+d4)/4
+#         currentDice = (d1+d2+d3+d4)/4
 
-        print("[val] DSC: (1): {:.4f} (2): {:.4f}  (3): {:.4f} (4): {:.4f}".format(d1,d2,d3,d4)) # MRI
+#         print("[val] DSC: (1): {:.4f} (2): {:.4f}  (3): {:.4f} (4): {:.4f}".format(d1,d2,d3,d4)) # MRI
 
-        currentDice = currentDice.data.numpy()
+#         currentDice = currentDice.data.numpy()
 
-        # Evaluate on 3D
-        saveImages_for3D(net, val_loader_save_images, batch_size_val_save, 1000, modelName, False, False)
-        reconstruct3D(modelName, 1000, isBest=False)
-        DSC_3D = evaluate3D(modelName)
+#         # Evaluate on 3D
+#         saveImages_for3D(net, val_loader_save_images, batch_size_val_save, 1000, modelName, False, False)
+#         reconstruct3D(modelName, 1000, isBest=False)
+#         DSC_3D = evaluate3D(modelName)
 
-        mean_DSC3D = np.mean(DSC_3D, 0)
-        std_DSC3D = np.std(DSC_3D,0)
+#         mean_DSC3D = np.mean(DSC_3D, 0)
+#         std_DSC3D = np.std(DSC_3D,0)
 
-        d1Val_3D.append(mean_DSC3D[0])
-        d2Val_3D.append(mean_DSC3D[1])
-        d3Val_3D.append(mean_DSC3D[2])
-        d4Val_3D.append(mean_DSC3D[3])
-        d1Val_3D_std.append(std_DSC3D[0])
-        d2Val_3D_std.append(std_DSC3D[1])
-        d3Val_3D_std.append(std_DSC3D[2])
-        d4Val_3D_std.append(std_DSC3D[3])
+#         d1Val_3D.append(mean_DSC3D[0])
+#         d2Val_3D.append(mean_DSC3D[1])
+#         d3Val_3D.append(mean_DSC3D[2])
+#         d4Val_3D.append(mean_DSC3D[3])
+#         d1Val_3D_std.append(std_DSC3D[0])
+#         d2Val_3D_std.append(std_DSC3D[1])
+#         d3Val_3D_std.append(std_DSC3D[2])
+#         d4Val_3D_std.append(std_DSC3D[3])
 
-        np.save(os.path.join(directory, 'd0Val_3D.npy'), d1Val_3D)
-        np.save(os.path.join(directory, 'd1Val_3D.npy'), d2Val_3D)
-        np.save(os.path.join(directory, 'd2Val_3D.npy'), d3Val_3D)
-        np.save(os.path.join(directory, 'd3Val_3D.npy'), d4Val_3D)
+#         np.save(os.path.join(directory, 'd0Val_3D.npy'), d1Val_3D)
+#         np.save(os.path.join(directory, 'd1Val_3D.npy'), d2Val_3D)
+#         np.save(os.path.join(directory, 'd2Val_3D.npy'), d3Val_3D)
+#         np.save(os.path.join(directory, 'd3Val_3D.npy'), d4Val_3D)
         
-        np.save(os.path.join(directory, 'd0Val_3D_std.npy'), d1Val_3D_std)
-        np.save(os.path.join(directory, 'd1Val_3D_std.npy'), d2Val_3D_std)
-        np.save(os.path.join(directory, 'd2Val_3D_std.npy'), d3Val_3D_std)
-        np.save(os.path.join(directory, 'd3Val_3D_std.npy'), d4Val_3D_std)
+#         np.save(os.path.join(directory, 'd0Val_3D_std.npy'), d1Val_3D_std)
+#         np.save(os.path.join(directory, 'd1Val_3D_std.npy'), d2Val_3D_std)
+#         np.save(os.path.join(directory, 'd2Val_3D_std.npy'), d3Val_3D_std)
+#         np.save(os.path.join(directory, 'd3Val_3D_std.npy'), d4Val_3D_std)
 
 
         if currentDice > BestDice:
