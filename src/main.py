@@ -68,7 +68,7 @@ def check_accuracy(loader, model, device="cuda"):
             outputs0_2, \
             outputs1_2, \
             outputs2_2, \
-            outputs3_2 = net(x)
+            outputs3_2 = model(x)
             
             outputs0_2, outputs1_2, outputs2_2, outputs3_2 = torch.sigmoid(outputs0_2), torch.sigmoid(outputs1_2), \
                                                              torch.sigmoid(outputs2_2), torch.sigmoid(outputs3_2)
