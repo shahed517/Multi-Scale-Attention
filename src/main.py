@@ -185,6 +185,8 @@ def runTraining(args):
                 outputs0 + outputs1 + outputs2 + outputs3 +\
                 outputs0_2 + outputs1_2 + outputs2_2 + outputs3_2
                 ) / 8
+            ###
+            segmentation_prediction = torch.sigmoid(segmentation_prediction)
 #             predClass_y = softMax(segmentation_prediction)
 
 #             Segmentation_planes = getOneHotSegmentation(Segmentation)
@@ -260,6 +262,7 @@ def runTraining(args):
         Losses.append(np.mean(lossVal))
         
         d1,d2,d3,d4 = inference(net, val_loader)
+        iou_score_val, f1_score_val, _, _, _, _ = check_accuracy(val_loader, model, device=DEVICE)
         
 #         d1Val.append(d1)
 #         d2Val.append(d2)
